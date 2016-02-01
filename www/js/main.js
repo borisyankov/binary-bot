@@ -1,5 +1,4 @@
-var api = new LiveApi();
+var api = BinaryAPI();
 var login = function login(token, callback){
-	api.authorize(token);
-	console.log('hi');
+	api.authenticate(token, callback);
 };

@@ -9,7 +9,6 @@
   "author": "Amin Marashi",
   "license": "MIT",
   "dependencies": {
-    "binary-live-api": "~12.0.0",
     "blockly": "git+https://git@github.com/google/blockly.git"
   }
 }
