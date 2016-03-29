@@ -1,5 +1,5 @@
 {
-  "name": "binary-visual-bot",
+  "name": "binary-bot",
   "version": "0.0.0",
   "description": "Visual automation for binary.com",
   "main": "index.js",
@@ -9,6 +9,10 @@
   "author": "Amin Marashi",
   "license": "MIT",
   "dependencies": {
-    "blockly": "git+https://git@github.com/google/blockly.git"
-  }
+    "binary-live-api": "~12.0.0",
+    "blockly": "git+https://git@github.com/google/blockly.git",
+    "jquery": "^2.2.2",
+    "notifyjs": "git+https://git@github.com/notifyjs/notifyjs.git"
+  },
+  "devDependencies": {}
 }
