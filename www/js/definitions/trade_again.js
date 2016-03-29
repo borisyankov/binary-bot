@@ -4,7 +4,13 @@ Blockly.Blocks['trade_again'] = {
 	init: function() {
 		this.appendDummyInput()
 			.appendField("Trade Again");
-		this.setPreviousStatement(true, null);
+		this.setPreviousStatement(true, 'TradeAgain');
 		this.setColour(180);
-	}
+	},
+	onchange: function(ev) {
+		var topParent = Bot.utils.findTopParentBlock(this);
+		if ( topParent !== null && topParent.id !== 'finish' ) {
+			this.unplug();
+		}
+	},
 };
