@@ -81,7 +81,7 @@
 			var contractId = purchaseContract.buy.contract_id;
 			portfolio.portfolio.contracts.forEach(function (contract) {
 				if (contract.contract_id == contractId) {
-					log('Processing the contract: ' + contract.contract_id);
+					log('Waiting for the purchased contract to finish', 'info');
 					Bot.server.contractService.addContract({
 						statement: contract.transaction_id,
 						startTime: contract.date_start + 1,
@@ -103,11 +103,22 @@
 			var proposalContract = (option === Bot.contracts[1].echo_req.contract_type)? Bot.contracts[1] : Bot.contracts[0];
 			log('purchasing contract: ' + proposalContract.proposal.longcode, 'info');
 			Bot.server.api.buyContract(proposalContract.proposal.id, proposalContract.proposal.ask_price).then(function(purchaseContract){
+				log('Contract was purchased successfully', 'success');
 				Bot.server.portfolio(proposalContract, purchaseContract);
 			}, function(reason){
 				showError(reason.message);
 			});
 		}
+	};
+
+	Bot.server.checkTick = function checkTick(){
+		setTimeout(function(){
+			if ( !Bot.server.tickWasRecieved ) {
+				showError('No ticks was received in 5 seconds');
+				log('restarting the trade...', 'info');
+				Bot.server.init.apply(this, Bot.server.tradeConfig);
+			}
+		}, 5000);
 	};
 
 	Bot.server.requestHistory = function requestHistory(){
@@ -117,6 +128,8 @@
 			"subscribe": 1,
 		}).then(function(value){
 			log('Request sent for history');
+			Bot.server.tickWasRecieved = false;
+			Bot.server.checkTick();
 		}, function(reason){
 			showError(reason.message);
 		});
@@ -125,8 +138,9 @@
 	Bot.server.observeTicks = function observeTicks(){
 
 		Bot.server.api.events.on('tick', function (feed) {
-			log('tick received at: ' + feed.tick.epoch);
 			if (feed && feed.echo_req.ticks_history === Bot.server.symbol) {
+				log('tick received at: ' + feed.tick.epoch);
+				Bot.server.tickWasRecieved = true;
 				Bot.server.contractService.addTick(feed.tick);
 			}
 		});
@@ -153,18 +167,24 @@
 		});
 	};
 
+	Bot.server.stop = function stop(){
+		if ( Bot.server.hasOwnProperty('api') ) {
+			console.log('API is disconnected');
+			Bot.server.api.disconnect();
+		}
+	};
+
 	Bot.server.init = function init(token, callback, strategy, finish){
-		log('Processing the trade...', 'info');
 		if ( token === '' ) {
 			showError('No token is available to authenticate');
 			return;
 		}
-		if ( Bot.server.hasOwnProperty('api') ) {
-			Bot.server.api.disconnect();
-		}
+		Bot.server.stop();
 		Bot.server.api = new LiveApi();
+		log('Authenticating...', 'info');
 		Bot.server.api.authorize(token).then(function(response){
 			log('Authenticated using token: ' + token, 'success');
+			Bot.server.tradeConfig = [token, callback, strategy, finish];
 			Bot.server.contractService = ContractService();	
 			Bot.contracts = [];
 			Bot.server.strategyFinished = true;
