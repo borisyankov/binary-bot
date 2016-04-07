@@ -23,6 +23,7 @@
 				<button title="Stop the blocks" onclick="stopCode()">Stop</button>
 			</div>
 	</div>
+	<div class="logout"><button onclick="Bot.server.logout()">Logout</button></div>
 	<div class="help">
 		Tours:
 		<select id="tours">
@@ -31,7 +32,6 @@
 		</select>
 		<button onclick="Bot.startTutorial()">Go!</button>
 	</div>
-	<div class="logout"><button onclick="Bot.server.logout()">Logout</button></div>
 	<div id="outputPanel">
 		<div class="hidePanel"><p>&gt;</p></div>
 		<div class="showPanel"><p>&lt;</p></div>
@@ -313,9 +313,17 @@
 				<block type="evenodd"></block>
 				<block type="overunder"></block>
 			</category>
-			<category name="Tools" colour="180">
+			<category name="Strategy" colour="290">
+				<block type="tick"></block>
+				<block type="direction"></block>
 				<block type="purchase"></block>
+			</category>
+			<category name="On Finish" colour="290">
+				<block type="contract_result"></block>
+				<block type="contract_details"></block>
 				<block type="trade_again"></block>
+			</category>
+			<category name="Tools" colour="180">
 				<block type="read_details"></block>
 				<block type="balance"></block>
 				<block type="total_profit"></block>
@@ -325,31 +333,16 @@
   </xml>
 
 	<xml id="startBlocks" style="display: none">
-		<block type="trade" id="trade" x="24" y="32">
-		</block>
-		<block type="procedures_defnoreturn" id="strategy" x="550" y="10">
-			<mutation>
-				<arg name="tick"></arg>
-				<arg name="direction"></arg>
-			</mutation>
-			<field name="NAME">decide when to purchase with each tick</field>
-			<comment pinned="false" h="80" w="160">This block is called when a new tick is received, a purchase block is usually added to this block</comment>
-		</block>
-		<block type="procedures_defnoreturn" id="finish" x="550" y="210">
-			<mutation>
-				<arg name="result"></arg>
-				<arg name="details"></arg>
-			</mutation>
-			<field name="NAME">decide what to do after the contract is finished</field>
-			<comment pinned="false" h="80" w="160">This block is called when a contract is finished, one can decide to trade again by adding a trade block to this block</comment>
-		</block>
+		<block type="trade" id="trade" x="10" y="10"></block>
+		<block type="on_strategy" id="strategy" x="400" y="10"></block>
+		<block type="on_finish" id="finish" x="400" y="210"></block>
 	</xml>
 
 	<script src="node_modules/binary-live-api/lib/binary-live-api.js"></script>
 	<script src="node_modules/jquery/dist/jquery.min.js"></script>
 	<script src="node_modules/notifyjs-browser/dist/notify.js"></script>
 	<script src="node_modules/notifyjs-browser/dist/styles/metro/notify-metro.js"></script>
-  <script src="node_modules/blockly/blockly_compressed.js"></script>
+  <script src="node_modules/blockly/blockly_uncompressed.js"></script>
   <script src="node_modules/blockly/blocks_compressed.js"></script>
   <script src="node_modules/blockly/javascript_compressed.js"></script>
   <script src="node_modules/blockly/msg/js/en.js"></script>
@@ -365,22 +358,34 @@
   <script src="www/js/utils.js"></script>
   <script src="www/js/conditions.js"></script>
   <script src="www/js/markets.js"></script>
-  <script src="www/js/definitions/total_profit.js"></script>
-  <script src="www/js/definitions/balance.js"></script>
-  <script src="www/js/definitions/notify.js"></script>
-  <script src="www/js/definitions/read_details.js"></script>
   <script src="www/js/definitions/trade.js"></script>
-  <script src="www/js/definitions/trade_again.js"></script>
-  <script src="www/js/definitions/purchase.js"></script>
+  <script src="www/js/definitions/strategy/purchase.js"></script>
+  <script src="www/js/definitions/strategy/tick.js"></script>
+  <script src="www/js/definitions/strategy/direction.js"></script>
+  <script src="www/js/definitions/strategy/strategy.js"></script>
+  <script src="www/js/definitions/tools/total_profit.js"></script>
+  <script src="www/js/definitions/tools/balance.js"></script>
+  <script src="www/js/definitions/tools/notify.js"></script>
+  <script src="www/js/definitions/tools/read_details.js"></script>
+  <script src="www/js/definitions/finish/trade_again.js"></script>
+  <script src="www/js/definitions/finish/finish.js"></script>
+  <script src="www/js/definitions/finish/result.js"></script>
+  <script src="www/js/definitions/finish/details.js"></script>
   <script src="www/js/definitions/submarkets/random/ticktrade_markets.js"></script>
   <script src="www/js/definitions/conditions/ticktrades.js"></script>
-  <script src="www/js/code_generators/total_profit.js"></script>
-  <script src="www/js/code_generators/balance.js"></script>
-  <script src="www/js/code_generators/notify.js"></script>
-  <script src="www/js/code_generators/read_details.js"></script>
   <script src="www/js/code_generators/trade.js"></script>
-  <script src="www/js/code_generators/trade_again.js"></script>
-  <script src="www/js/code_generators/purchase.js"></script>
+  <script src="www/js/code_generators/strategy/tick.js"></script>
+  <script src="www/js/code_generators/strategy/direction.js"></script>
+  <script src="www/js/code_generators/strategy/strategy.js"></script>
+  <script src="www/js/code_generators/strategy/purchase.js"></script>
+  <script src="www/js/code_generators/tools/total_profit.js"></script>
+  <script src="www/js/code_generators/tools/balance.js"></script>
+  <script src="www/js/code_generators/tools/notify.js"></script>
+  <script src="www/js/code_generators/tools/read_details.js"></script>
+  <script src="www/js/code_generators/finish/result.js"></script>
+  <script src="www/js/code_generators/finish/details.js"></script>
+  <script src="www/js/code_generators/finish/trade_again.js"></script>
+  <script src="www/js/code_generators/finish/finish.js"></script>
   <script src="www/js/code_generators/submarkets/random/ticktrade_markets.js"></script>
   <script src="www/js/code_generators/conditions/ticktrades.js"></script>
   <script src="www/js/main.js"></script>
