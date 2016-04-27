@@ -49,7 +49,7 @@
 		try {
 			Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
 			var code = Blockly.JavaScript.workspaceToCode(Blockly.mainWorkspace);
-			console.log(code);
+			Bot.utils.log(code);
 		} catch(e) {
 			Bot.utils.showError(e);
 		}
@@ -203,6 +203,10 @@
 	};
 
 	$('#summaryPanel').drags();
+
+	$('#chart').mousedown(function(e){ // allow default chart mousedown actions
+		e.stopPropagation();
+	});
 
 	Bot.showTrades();
 	Bot.chart = BinaryChart.createChart('chart', { ticks: [] });
