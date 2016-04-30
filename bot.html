@@ -26,50 +26,50 @@
 	<div id="center"></div>
 	<div class="toolbox">
 			<div class="intro-file-management">
-				<span>Open Blocks XML: </span><input title="Open an already saved XML file and retrieve its blocks" type="file" id="files" accept=".xml">
-				<button title="Save the blocks as a XML file" onclick="Bot.saveXml()">Save Blocks</button>
+				<span data-i18n-text="Open Block file"></span> <input title="Open an already saved XML file and retrieve its blocks" type="file" id="files" accept=".xml">
+				<button title="Save the blocks as a XML file" onclick="Bot.saveXml()" data-i18n-text="Save Blocks"></button>
 			</div>
 			<div class="intro-token">
-				<button title="Add your tokens to the bot" onclick="Bot.addAccount()">Add Token</button>
+				<button title="Add your tokens to the bot" onclick="Bot.addAccount()" data-i18n-text="Add Token"></button>
 			</div>
 			<div class="intro-undo-redo">
-				<button title="Undo the changes (Ctrl+Z)" onclick="Bot.undo()">Undo</button>
-				<button title="Redo the changes (Ctrl+Shift+Z)" onclick="Bot.redo()">Redo</button>
+				<button title="Undo the changes (Ctrl+Z)" onclick="Bot.undo()" data-i18n-text="Undo"></button>
+				<button title="Redo the changes (Ctrl+Shift+Z)" onclick="Bot.redo()" data-i18n-text="Redo"></button>
 			</div>
 			<div class="intro-summary">
-				<button title="Open the summary panel" onclick="Bot.showSummary()">Summary</button>
+				<button title="Open the summary panel" onclick="Bot.showSummary()" data-i18n-text="Summary"></button>
 			</div>
 			<div class="intro-run-stop">
-				<button title="Run the blocks" id="runButton" onclick="Bot.run()">Run</button>
-				<button title="Stop the blocks" id="stopButton">Reset</button>
+				<button title="Run the blocks" id="runButton" onclick="Bot.run()" data-i18n-text="Run"></button>
+				<button title="Stop the blocks" id="stopButton" data-i18n-text="Reset"></button>
 			</div>
 	</div>
-	<div class="logout"><button onclick="Bot.server.logout()">Logout</button></div>
+	<div class="logout"><button onclick="Bot.server.logout()" data-i18n-text="Logout"></button></div>
 	<div class="help">
 		<span class="tutorialList">
-			Tours:
+			<span data-i18n-text="Tours:"></span>
 			<select id="tours">
-				<option value="welcome">Welcome!</option>
-				<option value="introduction">Introduction</option>
+				<option value="welcome" data-i18n-text="Welcome!"></option>
+				<option value="introduction" data-i18n-text="Introduction"></option>
 			</select>
 		</span>
-		<button id="tutorialButton">Go!</button>
+		<button id="tutorialButton" data-i18n-text="Go!"></button>
 	</div>
 	<div id="blocklyDiv"></div>
 	<div id="summaryPanel">
 		<div class="exitPanel"><p>x</p></div>
 		<div class="content">
 			<h4>
-				Summary
+				<span data-i18n-text="Summary"></span>
 			</h4>
 			<table id="summaryDisplay">
 				<thead>
 					<tr>
-						<th>No. of runs</th>
-						<th>Total Stake</th>
-						<th>Total Payout</th>
-						<th>Total Profit/Loss</th>
-						<th>Balance</th>
+						<th data-i18n-text="No. of runs"></th>
+						<th data-i18n-text="Total Stake"></th>
+						<th data-i18n-text="Total Payout"></th>
+						<th data-i18n-text="Total Profit/Loss"></th>
+						<th data-i18n-text="Balance"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -83,20 +83,20 @@
 				</tbody>
 			</table>
 			<h4>
-				Trades
+				<span data-i18n-text="Trades"></span>
 			</h4>
 			<div class="table-scroll">
 				<table id="tradesDisplay">
 					<thead>
 						<tr>
-							<th><span>Number</span></th>
-							<th><span>Reference</span></th>
-							<th><span>TradeType</span></th>
-							<th><span>Entry Spot</span></th>
-							<th><span>Exit Spot</span></th>
-							<th><span>Buy Price</span></th>
-							<th><span>Final Price</span></th>
-							<th><span>Profit/Loss</span></th>
+							<th><span data-i18n-text="Number"></span></th>
+							<th><span data-i18n-text="Reference"></span></th>
+							<th><span data-i18n-text="TradeType"></span></th>
+							<th><span data-i18n-text="Entry Spot"></span></th>
+							<th><span data-i18n-text="Exit Spot"></span></th>
+							<th><span data-i18n-text="Buy Price"></span></th>
+							<th><span data-i18n-text="Final Price"></span></th>
+							<th><span data-i18n-text="Profit/Loss"></span></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -106,292 +106,6 @@
 			<div id="chart"></div>
 		</div>
 	</div>
-
-  <xml id="toolbox" style="display: none">
-    <category name="Logic" colour="210">
-			<block type="controls_if"></block>
-			<block type="logic_compare"></block>
-			<block type="logic_operation"></block>
-			<block type="logic_negate"></block>
-			<block type="logic_boolean"></block>
-			<block type="logic_null"></block>
-			<block type="logic_ternary"></block>
-    </category>
-    <category name="Math" colour="230">
-			<block type="math_number">
-			<field name="NUM">1</field>
-			</block>
-			<block type="math_arithmetic">
-			<value name="A">
-			<shadow type="math_number">
-			<field name="NUM">1</field>
-			</shadow>
-			</value>
-			<value name="B">
-			<shadow type="math_number">
-			<field name="NUM">1</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_single">
-			<value name="NUM">
-			<shadow type="math_number">
-			<field name="NUM">9</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_trig">
-			<value name="NUM">
-			<shadow type="math_number">
-			<field name="NUM">45</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_constant"></block>
-			<block type="math_number_property">
-			<value name="NUMBER_TO_CHECK">
-			<shadow type="math_number">
-			<field name="NUM">0</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_change">
-			<value name="DELTA">
-			<shadow type="math_number">
-			<field name="NUM">1</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_round">
-			<value name="NUM">
-			<shadow type="math_number">
-			<field name="NUM">3.1</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_on_list"></block>
-			<block type="math_modulo">
-			<value name="DIVIDEND">
-			<shadow type="math_number">
-			<field name="NUM">64</field>
-			</shadow>
-			</value>
-			<value name="DIVISOR">
-			<shadow type="math_number">
-			<field name="NUM">10</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_constrain">
-			<value name="VALUE">
-			<shadow type="math_number">
-			<field name="NUM">50</field>
-			</shadow>
-			</value>
-			<value name="LOW">
-			<shadow type="math_number">
-			<field name="NUM">1</field>
-			</shadow>
-			</value>
-			<value name="HIGH">
-			<shadow type="math_number">
-			<field name="NUM">100</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_random_int">
-			<value name="FROM">
-			<shadow type="math_number">
-			<field name="NUM">1</field>
-			</shadow>
-			</value>
-			<value name="TO">
-			<shadow type="math_number">
-			<field name="NUM">100</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="math_random_float"></block>
-
-    </category>
-    <category name="Text" colour="160">
-			<block type="text"></block>
-			<block type="text_join"></block>
-			<block type="text_append">
-			<value name="TEXT">
-			<shadow type="text"></shadow>
-			</value>
-			</block>
-			<block type="text_length">
-			<value name="VALUE">
-			<shadow type="text">
-			<field name="TEXT">abc</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="text_isEmpty">
-			<value name="VALUE">
-			<shadow type="text">
-			<field name="TEXT"></field>
-			</shadow>
-			</value>
-			</block>
-			<block type="text_indexOf">
-			<value name="VALUE">
-			<block type="variables_get">
-			<field name="VAR">text</field>
-			</block>
-			</value>
-			<value name="FIND">
-			<shadow type="text">
-			<field name="TEXT">abc</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="text_charAt">
-			<value name="VALUE">
-			<block type="variables_get">
-			<field name="VAR">text</field>
-			</block>
-			</value>
-			</block>
-			<block type="text_getSubstring">
-			<value name="STRING">
-			<block type="variables_get">
-			<field name="VAR">text</field>
-			</block>
-			</value>
-			</block>
-			<block type="text_changeCase">
-			<value name="TEXT">
-			<shadow type="text">
-			<field name="TEXT">abc</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="text_trim">
-			<value name="TEXT">
-			<shadow type="text">
-			<field name="TEXT">abc</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="text_print">
-			<value name="TEXT">
-			<shadow type="text">
-			<field name="TEXT">abc</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="text_prompt_ext">
-			<value name="TEXT">
-			<shadow type="text">
-			<field name="TEXT">abc</field>
-			</shadow>
-			</value>
-			</block>
-    </category>
-		<category name="List" colour="260">
-			<block type="lists_create_with">
-			<mutation items="0"></mutation>
-			</block>
-			<block type="lists_create_with"></block>
-			<block type="lists_repeat">
-			<value name="NUM">
-			<shadow type="math_number">
-			<field name="NUM">5</field>
-			</shadow>
-			</value>
-			</block>
-			<block type="lists_length"></block>
-			<block type="lists_isEmpty"></block>
-			<block type="lists_indexOf">
-			<value name="VALUE">
-			<block type="variables_get">
-			<field name="VAR">list</field>
-			</block>
-			</value>
-			</block>
-			<block type="lists_getIndex">
-			<value name="VALUE">
-			<block type="variables_get">
-			<field name="VAR">list</field>
-			</block>
-			</value>
-			</block>
-			<block type="lists_setIndex">
-			<value name="LIST">
-			<block type="variables_get">
-			<field name="VAR">list</field>
-			</block>
-			</value>
-			</block>
-			<block type="lists_getSublist">
-			<value name="LIST">
-			<block type="variables_get">
-			<field name="VAR">list</field>
-			</block>
-			</value>
-			</block>
-			<block type="lists_split">
-			<value name="DELIM">
-			<shadow type="text">
-			<field name="TEXT">,</field>
-			</shadow>
-			</value>
-			</block>
-		</category>
-		<category name="Variable" id="Variables" colour="330" custom="VARIABLE"></category>
-		<category name="Functions" id="Functions" colour="290" custom="PROCEDURE"></category>
-    <category name="Binary" colour="60">
-			<category name="Volatility Indices" colour="345">
-				<category name="Continuous Indices" colour="345">
-					<block type="r_100"></block>
-					<block type="r_25"></block>
-					<block type="r_50"></block>
-					<block type="r_75"></block>
-				</category>
-				<category name="Daily Reset Indices" colour="345">
-					<block type="rdbear"></block>
-					<block type="rdbull"></block>
-				</category>
-			</category>
-			<category name="Conditions" colour="15">
-				<block type="updown"></block>
-				<block type="asian"></block>
-				<block type="matchesdiffers"></block>
-				<block type="evenodd"></block>
-				<block type="overunder"></block>
-			</category>
-			<category name="Strategy" colour="290">
-				<block type="tick"></block>
-				<block type="direction"></block>
-				<block type="direction_up"></block>
-				<block type="direction_down"></block>
-				<block type="direction_no_change"></block>
-				<block type="purchase"></block>
-			</category>
-			<category name="On Finish" colour="290">
-				<block type="contract_result"></block>
-				<block type="contract_details"></block>
-				<block type="contract_win"></block>
-				<block type="contract_loss"></block>
-				<block type="read_details"></block>
-				<block type="trade_again"></block>
-			</category>
-			<category name="Tools" colour="180">
-				<block type="balance"></block>
-				<block type="total_profit"></block>
-				<block type="notify"></block>
-			</category>
-    </category>
-  </xml>
-
-	<xml id="startBlocks" style="display: none">
-		<block type="trade" id="trade" x="10" y="10"></block>
-		<block type="on_strategy" id="strategy" x="400" y="10"></block>
-		<block type="on_finish" id="finish" x="400" y="210"></block>
-	</xml>
 
 	<script src="node_modules/i18next/i18next.js"></script>
 	<script src="node_modules/i18next-xhr-backend/i18nextXHRBackend.js"></script>
@@ -403,7 +117,6 @@
   <script src="node_modules/blockly/blockly_compressed.js"></script>
   <script src="node_modules/blockly/blocks_compressed.js"></script>
   <script src="node_modules/blockly/javascript_compressed.js"></script>
-  <script src="node_modules/blockly/msg/js/en.js"></script>
   <script src="bower_components/file-saver.js/FileSaver.js"></script>
   <script src="bower_components/underscore/underscore-min.js"></script>
   <script src="bower_components/backbone/backbone-min.js"></script>

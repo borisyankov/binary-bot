@@ -24,6 +24,15 @@ Bot.Config = function Config() {
 				[i18n._('exit value'), '9'],
 				[i18n._('barrier'), '10'],
 			],
+			CHECK_RESULT: [
+				[i18n._('Win'), 'win'],
+				[i18n._('Loss'), 'loss'],
+			],
+			CHECK_DIRECTION: [
+				[i18n._('Up'), 'up'],
+				[i18n._('Down'), 'down'],
+				[i18n._('No Change'), ''],
+			],
 		},
 
 		opposites: {
@@ -333,7 +342,7 @@ Bot.Globals = function Globals() {
 };
 
 Bot.Version = function Version(){
-	Bot.version = '1.1.2';
+	Bot.version = '1.1.3';
 	if (Bot.debug) {
 		console.log('%cBinary Bot (v' + Bot.version + ') started.', 'color: green');
 	} else {
@@ -342,11 +351,34 @@ Bot.Version = function Version(){
 };
 
 Bot.View = function View() {
-	var workspace = Blockly.inject('blocklyDiv', {
-		media: 'node_modules/blockly/media/',
-		toolbox: document.getElementById('toolbox')
+	var workspace;
+	$.get('www/xml/toolbox.xml', function(toolbox){
+		workspace = Blockly.inject('blocklyDiv', {
+			media: 'node_modules/blockly/media/',
+			toolbox: i18n.xml(toolbox.getElementsByTagName('xml')[0]),
+			zoom: {
+				controls: true,
+				wheel: true,
+				startScale: 1.0,
+				maxScale: 3,
+				minScale: 0.3,
+				scaleSpeed: 1.2
+			},
+			trashcan: true,
+		});
+		$.get('www/xml/main.xml', function(main){
+			Blockly.Xml.domToWorkspace(main.getElementsByTagName('xml')[0], workspace);
+			Blockly.mainWorkspace.getBlockById('trade')
+				.setDeletable(false);
+			Blockly.mainWorkspace.getBlockById('strategy')
+				.setDeletable(false);
+			Blockly.mainWorkspace.getBlockById('finish')
+				.setDeletable(false);
+			Bot.utils.updateTokenList();
+			Bot.utils.addPurchaseOptions();
+			Blockly.mainWorkspace.clearUndo();
+		});
 	});
-	Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'), workspace);
 
 	var handleFileSelect = function handleFileSelect(e) {
 		var files;
@@ -388,6 +420,7 @@ Bot.View = function View() {
 							.setText(tokenList[0].account_name);
 					}
 					Blockly.mainWorkspace.clearUndo();
+					Blockly.mainWorkspace.zoomToFit();
 					Bot.utils.log(i18n._('Blocks are loaded successfully'), 'success');
 				} catch (err) {
 					Bot.utils.showError(err);
@@ -441,16 +474,6 @@ Bot.View = function View() {
 		ticks: []
 	});
 
-	Blockly.mainWorkspace.getBlockById('trade')
-		.setDeletable(false);
-	Blockly.mainWorkspace.getBlockById('strategy')
-		.setDeletable(false);
-	Blockly.mainWorkspace.getBlockById('finish')
-		.setDeletable(false);
-	Bot.utils.updateTokenList();
-	Bot.utils.addPurchaseOptions();
-	Blockly.mainWorkspace.clearUndo();
-	
 	Bot.uiComponents = {
 		tutorialList: '.tutorialList',
 		logout: '.logout',
@@ -514,20 +537,20 @@ Object.keys(Bot.config.opposites).forEach(function(opposites){
 				.appendField(option_names[0] + '/' + option_names[1]);
 			this.appendValueInput("DURATION")
 				.setCheck("Number")
-				.appendField("Ticks:");
+				.appendField(i18n._("Ticks:"));
 			this.appendDummyInput()
-				.appendField("Payout:")
+				.appendField(i18n._("Payout:"))
 				.appendField(new Blockly.FieldDropdown(Bot.config.lists.PAYOUTTYPE), "PAYOUTTYPE_LIST");
 			this.appendDummyInput()
-				.appendField("Currency:")
+				.appendField(i18n._("Currency:"))
 				.appendField(new Blockly.FieldDropdown(Bot.config.lists.CURRENCY), "CURRENCY_LIST");
 			this.appendValueInput("AMOUNT")
 				.setCheck("Number")
-				.appendField("Amount:");
+				.appendField(i18n._("Amount:"));
 			if ( Bot.config.opposites_have_barrier.indexOf(opposites) > -1 ) {
 				this.appendValueInput("PREDICTION")
 					.setCheck("Number")
-					.appendField("Prediction:");
+					.appendField(i18n._("Prediction:"));
 			}
 			this.setInputsInline(false);
 			this.setPreviousStatement(true, "Condition");
@@ -541,12 +564,27 @@ Object.keys(Bot.config.opposites).forEach(function(opposites){
 	};
 });
 
+Blockly.Blocks.contract_check_result = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(i18n._("Result is"))
+				.appendField(new Blockly.FieldDropdown(Bot.config.lists.CHECK_RESULT), "CHECK_RESULT");
+    this.setOutput(true, "Boolean");
+    this.setColour(180);
+    this.setTooltip(i18n._('True if the result matches the selection'));
+    this.setHelpUrl('https://github.com/binary-com/binary-bot/wiki');
+  },
+	onchange: function(ev) {
+		Bot.utils.getRelationChecker().inside_finish(this, ev, 'Check Result');
+	},
+};
+
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xq4ajc
 
 Blockly.Blocks.contract_details = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Contract Details");
+        .appendField(i18n._("Contract Details"));
     this.setOutput(true, "Array");
     this.setColour(180);
     this.setTooltip(i18n._('Returns the list of details for the finished contract'));
@@ -562,7 +600,7 @@ Blockly.Blocks.contract_details = {
 Blockly.Blocks.on_finish = {
   init: function() {
     this.appendDummyInput()
-        .appendField("On Finish (Decide what to do after the contract is finished)");
+        .appendField(i18n._("On Finish (Decide what to do after the contract is finished)"));
     this.appendStatementInput("FINISH_STACK")
         .setCheck("TradeAgain");
     this.setColour(290);
@@ -571,26 +609,12 @@ Blockly.Blocks.on_finish = {
   }
 };
 
-Blockly.Blocks.contract_loss = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("Loss");
-    this.setOutput(true, "Boolean");
-    this.setColour(180);
-    this.setTooltip(i18n._('True if the tick direction is loss'));
-    this.setHelpUrl('https://github.com/binary-com/binary-bot/wiki');
-  },
-	onchange: function(ev) {
-		Bot.utils.getRelationChecker().inside_finish(this, ev, 'Loss');
-	},
-};
-
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#u8i287
 
 Blockly.Blocks.read_details = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Contract Detail:")
+        .appendField(i18n._("Contract Detail:"))
         .appendField(new Blockly.FieldDropdown(Bot.config.lists.DETAILS), "DETAIL_INDEX");
 		this.setOutput(true, null);
     this.setColour(180);
@@ -607,7 +631,7 @@ Blockly.Blocks.read_details = {
 Blockly.Blocks.contract_result = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Contract Result");
+        .appendField(i18n._("Contract Result"));
     this.setOutput(true, "String");
     this.setColour(180);
     this.setTooltip(i18n._('Returns the result of the finished contract'));
@@ -624,7 +648,7 @@ Blockly.Blocks.contract_result = {
 Blockly.Blocks.trade_again = {
 	init: function() {
 		this.appendDummyInput()
-			.appendField("Trade Again");
+			.appendField(i18n._("Trade Again"));
 		this.setPreviousStatement(true, 'TradeAgain');
 		this.setColour(180);
 		this.setTooltip(i18n._('Runs the trade block again'));
@@ -635,17 +659,18 @@ Blockly.Blocks.trade_again = {
 	},
 };
 
-Blockly.Blocks.contract_win = {
+Blockly.Blocks.check_direction = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Win");
+        .appendField(i18n._("Direction is"))
+				.appendField(new Blockly.FieldDropdown(Bot.config.lists.CHECK_DIRECTION), "CHECK_DIRECTION");
     this.setOutput(true, "Boolean");
     this.setColour(180);
-    this.setTooltip(i18n._('True if the tick direction is win'));
+    this.setTooltip(i18n._('True if the direction matches the selection'));
     this.setHelpUrl('https://github.com/binary-com/binary-bot/wiki');
   },
 	onchange: function(ev) {
-		Bot.utils.getRelationChecker().inside_finish(this, ev, 'Win');
+		Bot.utils.getRelationChecker().inside_strategy(this, ev, 'Check Direction');
 	},
 };
 
@@ -654,7 +679,7 @@ Blockly.Blocks.contract_win = {
 Blockly.Blocks.direction = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Tick Direction");
+        .appendField(i18n._("Tick Direction"));
     this.setOutput(true, "String");
     this.setColour(180);
     this.setTooltip(i18n._('Returns the tick direction received by a strategy block, its value could be "up" if the tick is more than before, "down" if less than before and empty ("") if the tick is equal to the previous tick'));
@@ -666,40 +691,12 @@ Blockly.Blocks.direction = {
 };
 
 
-Blockly.Blocks.direction_down = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("Down");
-    this.setOutput(true, "Boolean");
-    this.setColour(180);
-    this.setTooltip(i18n._('True if the tick direction is Down'));
-    this.setHelpUrl('https://github.com/binary-com/binary-bot/wiki');
-  },
-	onchange: function(ev) {
-		Bot.utils.getRelationChecker().inside_strategy(this, ev, 'Down');
-	},
-};
-
-Blockly.Blocks.direction_no_change = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("No Change");
-    this.setOutput(true, "Boolean");
-    this.setColour(180);
-    this.setTooltip(i18n._('True if the tick direction is No Change'));
-    this.setHelpUrl('https://github.com/binary-com/binary-bot/wiki');
-  },
-	onchange: function(ev) {
-		Bot.utils.getRelationChecker().inside_strategy(this, ev, 'No Change');
-	},
-};
-
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#pbvgpo
 
 Blockly.Blocks.purchase = {
 	init: function() {
 		this.appendDummyInput()
-			.appendField("Purchase")
+			.appendField(i18n._("Purchase"))
 			.appendField(new Blockly.FieldDropdown(Bot.server.getPurchaseChoices), "PURCHASE_LIST");
 		this.setPreviousStatement(true, 'Purchase');
 		this.setColour(180);
@@ -716,7 +713,7 @@ Blockly.Blocks.purchase = {
 Blockly.Blocks.on_strategy = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Strategy (Decide when to purchase with each tick)");
+        .appendField(i18n._("Strategy (Decide when to purchase with each tick)"));
     this.appendStatementInput("STRATEGY_STACK")
         .setCheck('Purchase');
     this.setColour(290);
@@ -730,7 +727,7 @@ Blockly.Blocks.on_strategy = {
 Blockly.Blocks.tick = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Tick Value");
+        .appendField(i18n._("Tick Value"));
     this.setOutput(true, "Number");
     this.setColour(180);
     this.setTooltip(i18n._('Returns the tick value received by a strategy block'));
@@ -741,27 +738,13 @@ Blockly.Blocks.tick = {
 	},
 };
 
-Blockly.Blocks.direction_up = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("Up");
-    this.setOutput(true, "Boolean");
-    this.setColour(180);
-    this.setTooltip(i18n._('True if the tick direction is Up'));
-    this.setHelpUrl('https://github.com/binary-com/binary-bot/wiki');
-  },
-	onchange: function(ev) {
-		Bot.utils.getRelationChecker().inside_strategy(this, ev, 'Up');
-	},
-};
-
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#kqvz7z
 
 Blockly.Blocks.balance = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Balance:")
-        .appendField(new Blockly.FieldDropdown([["string", "STR"], ["number", "NUM"]]), "BALANCE_TYPE");
+        .appendField(i18n._("Balance:"))
+        .appendField(new Blockly.FieldDropdown([[i18n._("string"), "STR"], [i18n._("number"), "NUM"]]), "BALANCE_TYPE");
     this.setOutput(true, null);
     this.setColour(180);
     this.setTooltip(i18n._('Get balance number or string'));
@@ -775,8 +758,8 @@ Blockly.Blocks.notify = {
   init: function() {
     this.appendValueInput("MESSAGE")
         .setCheck(null)
-        .appendField("Notify type:")
-        .appendField(new Blockly.FieldDropdown([["success", "success"], ["information", "info"], ["warning", "warn"], ["error", "error"]]), "NOTIFICATION_TYPE");
+        .appendField(i18n._("Notify type:"))
+        .appendField(new Blockly.FieldDropdown([[i18n._("success"), "success"], [i18n._("information"), "info"], [i18n._("warning"), "warn"], [i18n._("error"), "error"]]), "NOTIFICATION_TYPE");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour(180);
@@ -790,7 +773,7 @@ Blockly.Blocks.notify = {
 Blockly.Blocks.total_profit = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Total Profit");
+        .appendField(i18n._("Total Profit"));
     this.setOutput(true, "Number");
     this.setColour(180);
     this.setTooltip(i18n._('Returns the total profit'));
@@ -865,6 +848,12 @@ Object.keys(Bot.config.opposites).forEach(function(opposites){
 	};
 });
 
+Blockly.JavaScript.contract_check_result = function(block) {
+	var check_with = block.getFieldValue('CHECK_RESULT');
+	var code = '(result === \'' + check_with + '\')';
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
 Blockly.JavaScript.contract_details = function(block) {
 	var code = 'details';
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
@@ -874,11 +863,6 @@ Blockly.JavaScript.on_finish = function(block) {
   var stack = Blockly.JavaScript.statementToCode(block, 'FINISH_STACK');
   var code = 'Bot.on_finish = function on_finish(result, details){\n' + stack + '\n};\n';
   return code;
-};
-
-Blockly.JavaScript.contract_loss = function(block) {
-	var code = '(result === \'loss\')';
-  return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript.read_details = function(block) {
@@ -901,23 +885,14 @@ Blockly.JavaScript.trade_again = function(block) {
 	return code;
 };
 
-Blockly.JavaScript.contract_win = function(block) {
-	var code = '(result === \'win\')';
+Blockly.JavaScript.check_direction = function(block) {
+	var check_with = block.getFieldValue('CHECK_DIRECTION');
+	var code = '(direction === \'' + check_with + '\')';
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript.direction = function(block) {
 	var code = 'direction';
-  return [code, Blockly.JavaScript.ORDER_ATOMIC];
-};
-
-Blockly.JavaScript.direction_down = function(block) {
-	var code = '(direction === \'down\')';
-  return [code, Blockly.JavaScript.ORDER_ATOMIC];
-};
-
-Blockly.JavaScript.direction_no_change = function(block) {
-	var code = '(direction === \'\')';
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -939,11 +914,6 @@ Blockly.JavaScript.on_strategy = function(block) {
 
 Blockly.JavaScript.tick = function(block) {
 	var code = 'tick';
-  return [code, Blockly.JavaScript.ORDER_ATOMIC];
-};
-
-Blockly.JavaScript.direction_up = function(block) {
-	var code = '(direction === \'up\')';
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -1650,7 +1620,7 @@ Bot.RelationChecker = function RelationChecker() {
 	var inside_strategy = function inside_strategy(blockObject, ev, name) {
 		var topParent = Bot.utils.findTopParentBlock(blockObject);
 		if (topParent !== null && (topParent.type === 'on_finish' || topParent.type === 'trade')) {
-			Bot.utils.log(i18n._(name + ' ' + 'must be added inside the strategy block'), 'warning');
+			Bot.utils.log(name + ' ' + i18n._('must be added inside the strategy block'), 'warning');
 			blockObject.unplug();
 		} else if (topParent !== null && topParent.type === 'on_strategy') {
 			if (blockObject.type === 'purchase') {
@@ -1661,7 +1631,7 @@ Bot.RelationChecker = function RelationChecker() {
 	var inside_finish = function inside_finish(blockObject, ev, name) {
 		var topParent = Bot.utils.findTopParentBlock(blockObject);
 		if (topParent !== null && (topParent.type === 'on_strategy' || topParent.type === 'trade')) {
-			Bot.utils.log(i18n._(name + ' ' + 'must be added inside the finish block'), 'warning');
+			Bot.utils.log(name + ' ' + i18n._('must be added inside the finish block'), 'warning');
 			blockObject.unplug();
 		} else if (topParent !== null && topParent.type === 'on_finish') {
 			if (blockObject.type === 'trade_again') {
@@ -1990,7 +1960,7 @@ Bot.Trade = function () {
 				"subscribe": 1
 			})
 			.then(function (value) {
-				log(i18n._('Request receieved for history'));
+				log(i18n._('Request received for history'));
 				if (callback) {
 					callback();
 				}
@@ -2558,7 +2528,7 @@ Bot.Introduction = function Introduction() {
 			Blockly.mainWorkspace.toolbox_.tree_.children_[6].setExpanded(false);
 		},
 	}, {
-		content: '<p>' + i18n._("Very good! It's time to add the options needed by the condition block, pick a number ") + '(<img src="www/image/number.png"/>)' + i18n._(" from the Math menu") + '</p>',
+		content: '<p>' + i18n._("Very good! It's time to add the options needed by the condition block, pick a number") + ' (<img src="www/image/number.png"/>) ' + i18n._("from the Math menu") + '</p>',
 		target: Bot.getUiComponent('flyout'),
 		highlightTarget: true,
 		my: 'left center',
@@ -2577,7 +2547,7 @@ Bot.Introduction = function Introduction() {
 			Bot.utils.setOpacity(started, 'toolbox', 0.3);
 		},
 	}, {
-		content: '<p>' + i18n._("Click on the number block to edit its value ") + '(<img src="www/image/number_editing.png"/>)' + i18n._(", change the value to 5 and add it to the <b>ticks</b> field of the condition block") + '</p>',
+		content: '<p>' + i18n._("Click on the number block to edit its value") + ' (<img src="www/image/number_editing.png"/>), ' + i18n._("change the value to 5 and add it to the <b>ticks</b> field of the condition block") + '</p>',
 		target: Bot.getUiComponent('workspace').find(Bot.uiComponents.submarket),
 		highlightTarget: true,
 		my: 'left center',
@@ -2898,7 +2868,7 @@ Bot.Welcome = function Welcome() {
 			Bot.utils.setOpacity(started, 'file_management', 0.3);
 		},
 	}, {
-		content: '<p>' + i18n._('Click to add a token, at least one token is needed. Get your token from ') + '<a href="https://www.binary.com/user/api_tokenws" target="_blank">' + i18n._('here') + '</a></p>',
+		content: '<p>' + i18n._('Click to add a token, at least one token is needed. Get your token from') + ' <a href="https://www.binary.com/user/api_tokenws" target="_blank">' + i18n._('here') + '</a></p>',
 		target: Bot.getUiComponent('token'),
 		nextButton: true,
 		highlightTarget: true,
